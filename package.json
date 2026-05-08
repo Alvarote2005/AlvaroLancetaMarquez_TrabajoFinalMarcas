@@ -1,0 +1,23 @@
+{
+  "name": "alvarolancetamarquez_trabajofinalmarcas",
+  "version": "1.0.0",
+  "description": "Último proyecto que contará como el último examen del curso de Lenguaje de Marcas 1º DAM",
+  "homepage": "https://github.com/Alvarote2005/AlvaroLancetaMarquez_TrabajoFinalMarcas#readme",
+  "bugs": {
+    "url": "https://github.com/Alvarote2005/AlvaroLancetaMarquez_TrabajoFinalMarcas/issues"
+  },
+  "repository": {
+    "type": "git",
+    "url": "git+https://github.com/Alvarote2005/AlvaroLancetaMarquez_TrabajoFinalMarcas.git"
+  },
+  "license": "ISC",
+  "author": "Álvaro Lanceta",
+  "type": "commonjs",
+  "main": "index.js",
+  "scripts": {
+    "test": "echo \"Error: no test specified\" && exit 1"
+  },
+  "dependencies": {
+    "express": "^5.2.1"
+  }
+}
