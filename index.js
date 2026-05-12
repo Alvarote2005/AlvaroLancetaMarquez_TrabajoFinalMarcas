@@ -5,12 +5,12 @@ const port = 2407;
 app.use(express.json());
 
 app.listen(port,() => {
-    console.log("Servidor en uso")
+    console.log("La librería esta abierta")
 })
 
 //RECURSO PRINCIPAL
 const libros = 
-  { id: 1, 
+    [{ id: 1, 
     nombre: "Cien años de soledad",
     identificador: "123-45-678-9001-2",
     autor: "Gabriel García Márquez",
@@ -19,13 +19,13 @@ const libros =
     genero: "Realismo mágico",
     num_paginas: 417,
     disponible: true
-  }
+  }]
 
 
 //RECURSO SECUNDARIO
 
-const prestamos = {
-    id: 101,
+const prestamos = 
+[{id: 101,
     libro_id: 1,
     fecha_prestamo: "2026-10-15",
     fecha_devolucion_estimada: "2026-10-29",
@@ -33,8 +33,7 @@ const prestamos = {
     usuario: "Álvaro Lanceta",
     email_usuario: "alanceta@gmail.com",
     estado: "activo"
-
-}
+}]
 
 function obtenerDatosPrestamo(libro_id){
     return prestamos.filter(prestamos => prestamos.libro_id === libro_id);
@@ -51,7 +50,7 @@ if (typeof module !== 'undefined' && module.exports){
 // 3.1.1 Todos los registros
 
 app.get('/api/libros', (req, res) => {
-    let resultado = [... libros];
+    res.json (libros);
 })
 
 //3.1.2 Obtener registros concretos de formas distintas vistas en clase (Route param)
@@ -76,7 +75,7 @@ app.get('/api/libros/busqueda', (req,res) => {
         return res.status(400).json({ error: "Se requiere el parámetro 'identificador'" });
     }
 
-    const libro = libros.find(l => l.identificador === identificador);
+    const libro = libros.find(l => l.id === id);
 
     if (libro){
         res.json(libro);
@@ -89,7 +88,7 @@ app.get('/api/libros/busqueda', (req,res) => {
 
 app.post('/api/libros', (req,res) => {
 const {nombre, identificador, autor, editorial, año_publicacion, genero, num_paginas } = req.body;
-})
+
 
 if (!nombre || !identificador || !autor || !editorial || !año_publicacion || !genero || !num_paginas){
         return res.status(400).json({ 
@@ -98,23 +97,23 @@ if (!nombre || !identificador || !autor || !editorial || !año_publicacion || !g
         });
 }
 
-if (libros.find (l => l.identificador === identificador)){
+if (libros.find(l => l.identificador === identificador)){
     return res.status(400).json({ error: "El identificador ya existe" });}
 
 const nuevoLibro = {
-    id = nextLibroId++,
+    id: libros.length+1,
     nombre,
     identificador,
     autor,
     editorial,
-    año_publicacion : parseInt(año_publicacion),
+    año_publicacion: parseInt(año_publicacion),
     genero,
     num_paginas: parseInt(num_paginas),
     disponible: true
 };
 
 libros.push(nuevoLibro);
-
+})
 //3.1.3 Modificar un registro (completo)
 
 app.put('/api/libros/:id', (req, res) => {
@@ -160,7 +159,7 @@ app.delete('/api/libros/:id', (req,res) =>{
     const id = parseInt(req.params.id);
     const indice = libros.findIndex(l => l.id === id);
 
-    if (index === -1) {
+    if (indice === -1) {
         return res.status(404).json({error: "Libro no encontrado"});
     }
 
