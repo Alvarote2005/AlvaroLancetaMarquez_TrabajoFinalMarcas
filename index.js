@@ -175,7 +175,7 @@ app.delete('/api/libros/:id', (req,res) =>{
 //3.2.1 Obtener todos los registros seundarios
 
 app.get('/api/prestamos', (req, res) => {
-    let resultado = [...prestamos];
+    res.json (prestamos)
 
 })
 
