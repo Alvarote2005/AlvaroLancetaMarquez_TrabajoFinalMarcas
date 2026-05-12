@@ -3,6 +3,7 @@
 
 ~~##1º Elegir un tema sobre el que hacer mi API (a elegir todavía)~~
 
-##2º Reutilizar el código sobre el que hice las pruebas de nodeJS
+~~##2º Reutilizar el código sobre el que hice las pruebas de nodeJS~~
 
-##3º Esquematizar el trabajo punto por punto en función del PDF
+~~##3º Esquematizar el trabajo punto por punto en función del PDF~~
+

@@ -43,3 +43,132 @@ function obtenerDatosPrestamo(libro_id){
 if (typeof module !== 'undefined' && module.exports){
     module.exports = {libros, prestamos, obtenerDatosPrestamo}
 }
+
+
+//3er APARTADO (ENDPOINTS)
+
+//3.1 OPERACIONES BÁSICAS
+// 3.1.1 Todos los registros
+
+app.get('/api/libros', (req, res) => {
+    let resultado = [... libros];
+})
+
+//3.1.2 Obtener registros concretos de formas distintas vistas en clase (Route param)
+
+app.get('/api/libros/:id', (req, res) => {
+    const id = parseInt(req.params.id);
+    const libro = libros.find(l = l.id === id);
+
+    if (libro){
+        res.json(libro);
+    } else {
+        res.status(404).json({ error: "Libro no encontrado" });
+    }
+})
+
+//3.1.2 Obtener registros concretos de formas distintas vistas en clase (Query param)
+
+app.get('/api/libros/busqueda', (req,res) => {
+    const {identificador} = req.query;
+
+    if (!identificador){
+        return res.status(400).json({ error: "Se requiere el parámetro 'identificador'" });
+    }
+
+    const libro = libros.find(l => l.identificador === identificador);
+
+    if (libro){
+        res.json(libro);
+    } else {
+        res.status(404).json({ error: "Libro no encontrado" });
+    }
+})
+
+//3.1.2 Crear un nuevo registro con validación de campos obligatorios
+
+app.post('/api/libros', (req,res) => {
+const {nombre, identificador, autor, editorial, año_publicacion, genero, num_paginas } = req.body;
+})
+
+if (!nombre || !identificador || !autor || !editorial || !año_publicacion || !genero || !num_paginas){
+        return res.status(400).json({ 
+            error: "Faltan campos obligatorios",
+            campos_requeridos: ["nombre", "identificador", "autor", "editorial", "año_publicacion", "genero", "num_paginas"]
+        });
+}
+
+if (libros.find (l => l.identificador === identificador)){
+    return res.status(400).json({ error: "El identificador ya existe" });}
+
+const nuevoLibro = {
+    id = nextLibroId++,
+    nombre,
+    identificador,
+    autor,
+    editorial,
+    año_publicacion : parseInt(año_publicacion),
+    genero,
+    num_paginas: parseInt(num_paginas),
+    disponible: true
+};
+
+libros.push(nuevoLibro);
+
+//3.1.3 Modificar un registro (completo)
+
+app.put('/api/libros/:id', (req, res) => {
+    const id = parseInt(req.params.id);
+    const index = libros.findIndex(l => l.id === id);
+    
+    if (index === -1) {
+        return res.status(404).json({ error: "Libro no encontrado" });
+    }
+    
+    const { nombre, identificador, autor, editorial, año_publicacion, genero, num_paginas, disponible } = req.body;
+    
+    if (!nombre || !identificador || !autor || !editorial || !año_publicacion || !genero || !num_paginas) {
+        return res.status(400).json({ 
+            error: "Faltan campos obligatorios para la actualización completa"
+        });
+    }
+
+    const otroLibro = libros.find(l => l.identificador === identificador && l.id !== id);
+    
+    if (otroLibro) {
+        return res.status(400).json({ error: "El identificador ya está en uso por otro libro" });
+    }
+    
+    libros[index] = {
+        id,
+        nombre,
+        identificador,
+        autor,
+        editorial,
+        año_publicacion: parseInt(año_publicacion),
+        genero,
+        num_paginas: parseInt(num_paginas),
+        disponible: disponible !== undefined ? disponible : true
+    };
+    
+    res.json(libros[index]);
+});
+
+// 3.1.4 Eliminar un registro
+
+app.delete('/api/libros/:id', (req,res) =>{
+    const id = parseInt(req.params.id);
+    const indice = libros.findIndex(l => l.id === id);
+
+    if (index === -1) {
+        return res.status(404).json({error: "Libro no encontrado"});
+    }
+
+    const prestamoActivo = prestamos.some(p => p.libro_id === id && p.estado === 'activo');
+
+    if (prestamoActivo){
+        return res.status(400).json({error: "No se pueden eliminar prstamos activos"});
+    }
+})
+
+//3.2 ENDPOINTS RECURSO SECUNDARIO
