@@ -46,12 +46,30 @@ if (typeof module !== 'undefined' && module.exports){
 
 //3er APARTADO (ENDPOINTS)
 
-//3.1 OPERACIONES BÁSICAS
+// 3.1 OPERACIONES BÁSICAS
 // 3.1.1 Todos los registros
 
 app.get('/api/libros', (req, res) => {
     res.json (libros);
 })
+//-------------------------------------------------------------------
+// 3.3 FILTROS 
+// 3.3.1 Filtrar por campo de texto
+
+if (nombre) {
+    resultado = resultado.filter(libro =>
+        libro.nombre.toLowerCase().includes(nombre.toLowerCase())
+    );
+}
+
+// 3.3.2 Filtrar por categoría de campo
+
+if (genero) {
+    resultado = resultado.filter(libro =>
+        libro.genero.toLowerCase() === genero.toLowerCase()
+    );
+}
+//-------------------------------------------------------------------
 
 //3.1.2 Obtener registros concretos de formas distintas vistas en clase (Route param)
 
@@ -170,14 +188,50 @@ app.delete('/api/libros/:id', (req,res) =>{
     }
 })
 
-//3.2 ENDPOINTS RECURSO SECUNDARIO
+// 3.2 ENDPOINTS RECURSO SECUNDARIO
 
-//3.2.1 Obtener todos los registros seundarios
+// 3.2.1 Obtener todos los registros seundarios
 
 app.get('/api/prestamos', (req, res) => {
     res.json (prestamos)
 
-})
+//-------------------------------------------------------------------    
+//3.3 Filtros 
+// 3.3.3 Filtrar por multiples campos
+
+if (año_min) {
+    resultado = resultado.filter(libro => libro.año_publicacion >= parseInt(año_min));
+}
+if (año_max) {
+    resultado = resultado.filter(libro => libro.año_publicacion <= parseInt(año_max));
+}
+
+// 3.3.6 Filtrar registros del recurso secundario en alguno de sus campos
+
+    const {usuario, estado, texto} = req.query;
+
+    if (usuario) {
+        resultado = resultado.filter(p =>
+            p.usuario.toLowerCase().includes(usuario.toLowerCase())
+        );
+    }
+
+    if (estado){
+        resultado = resultado.filter(p => p.estado === estado);
+    }
+
+    if (texto) {
+        resultado = resultado.filter(p=>
+            p.usuario.toLowerCase().includes(texto.toLowerCase()) ||
+            p.email_usuario.toLowerCase().includes(texto.toLowerCase())
+        );
+    }
+
+    res.json(resultado);
+
+});
+
+//-------------------------------------------------------------------
 
 //3.2.2 Obtener todos los registros secundarios que pertenecen a un registro principal concreto
 
