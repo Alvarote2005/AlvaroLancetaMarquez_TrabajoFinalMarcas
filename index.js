@@ -171,3 +171,77 @@ app.delete('/api/libros/:id', (req,res) =>{
 })
 
 //3.2 ENDPOINTS RECURSO SECUNDARIO
+
+//3.2.1 Obtener todos los registros seundarios
+
+app.get('/api/prestamos', (req, res) => {
+    let resultado = [...prestamos];
+
+})
+
+//3.2.2 Obtener todos los registros secundarios que pertenecen a un registro principal concreto
+
+app.get('/api/libros/:id/prestamos', (req,res) => {
+    const id = parseInt(req.params.id);
+    const libro = libros.find(l => l.id === id);
+
+    if (!libro) {
+        return res.status(404).json({error: "No se encontro el libro"});
+    }
+
+    const prestamosLibros = obtenerPrestamosLibro(id);
+    res.json({libro: libro.nombre,
+        total_prestamos: prestamosLibros.length,
+        prestamos: prestamosLibro
+    });
+});
+
+//3.2.3 Crear nuevo registro secundario
+
+app.post('/api/prestamos', (req,res) => {
+    const {libro_id, usuario, email_usuario, fecha_prestamo} = req.body;
+
+    if (!libro_id ||!usuario ||!email_usuario){
+        return res.status(400).json({
+            error: "Faltan campos obligatorios",
+            campos_requeridos: ["libro_id", "usuario", "email_usuario"]
+        });
+    }
+
+const libro = libros.find(l => l.id === libro_id);
+if (!libro) {
+    return res.status(404).json({error: "El libro no existe"})
+} 
+
+if(!libro.disponible){
+    return res.status(400).json({error: "El libro no esta disponible actualmente"})
+}
+
+const nuevoPrestamo = {
+        id: nextPrestamoId++,
+        libro_id: parseInt(libro_id),
+        fecha_prestamo: fecha_prestamo || new Date().toISOString().split('T')[0],
+        fecha_devolucion_estimada: new Date(Date.now() + 14*24*60*60*1000).toISOString().split('T')[0],
+        fecha_devolucion_real: null,
+        usuario,
+        email_usuario,
+        estado: "activo"
+    };
+
+    prestamos.push(nuevoPrestamo);
+    libro.disponible = false;
+    
+    res.status(201).json(nuevoPrestamo);
+});
+
+//3.2.4 Eliminar registro secundario
+
+app.delete('/api/prestamos/:id', (req,res) =>{
+    const id = parseInt(req.params.id);
+    const indice = prestamos.findIndex(p => p.id === id);
+
+    if (indice === -1){
+        return res.status(400).json({error: "No se puede eliminar el prestamo activo, registrate"})
+    }
+
+})
