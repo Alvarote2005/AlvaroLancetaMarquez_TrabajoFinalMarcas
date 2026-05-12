@@ -51,9 +51,10 @@ if (typeof module !== 'undefined' && module.exports){
 
 app.get('/api/libros', (req, res) => {
     res.json (libros);
-})
+
 //-------------------------------------------------------------------
 // 3.3 FILTROS 
+    const { nombre, genero, disponible, año_min, año_max, orden, limite } = req.query;
 // 3.3.1 Filtrar por campo de texto
 
 if (nombre) {
@@ -69,6 +70,7 @@ if (genero) {
         libro.genero.toLowerCase() === genero.toLowerCase()
     );
 }
+})
 //-------------------------------------------------------------------
 
 //3.1.2 Obtener registros concretos de formas distintas vistas en clase (Route param)
