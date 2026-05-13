@@ -9,8 +9,8 @@ app.listen(port,() => {
 })
 
 //RECURSO PRINCIPAL
-const libros = 
-    [{ id: 1, 
+const libros = [
+    { id: 1, 
     nombre: "Cien años de soledad",
     identificador: "123-45-678-9001-2",
     autor: "Gabriel García Márquez",
@@ -19,9 +19,21 @@ const libros =
     genero: "Realismo mágico",
     num_paginas: 417,
     disponible: true
-  }]
+  },
 
+  {     
+    id: 2,
+    nombre: "1984",
+    identificador: "123-45-678-9002-3",
+    autor: "George Orwell",
+    editorial: "Secker & Warburg",
+    año_publicacion: 1949,
+    genero: "Ciencia ficción",
+    num_paginas: 328,
+    disponible: true
+    },
 
+  ];
 //RECURSO SECUNDARIO
 
 const prestamos = 
@@ -33,7 +45,19 @@ const prestamos =
     usuario: "Álvaro Lanceta",
     email_usuario: "alanceta@gmail.com",
     estado: "activo"
-}]
+},
+
+{ id: 102,
+    libro_id: 2,
+    fecha_prestamo: 2026-12-6,
+    fecha_devolucion_estimada: 2027-2-12,
+    fecha_devolucion_real: null,
+    usuario: "Javi",
+    email_usuario: "javi@gmail.com",
+    estado: "inactivo"
+}
+
+];
 
 function obtenerDatosPrestamo(libro_id){
     return prestamos.filter(prestamos => prestamos.libro_id === libro_id);
@@ -46,10 +70,14 @@ if (typeof module !== 'undefined' && module.exports){
 
 //3er APARTADO (ENDPOINTS)
 
+/* Funciona correctamente las operaciones básicas de los registros primarios
+Usar el archivo "Pruebas JS" del escritorio para las pruebas */
+
+
 // 3.1 OPERACIONES BÁSICAS
 // 3.1.1 Todos los registros
 
-app.get('/api/libros', (req, res) => {
+app.get('/api/libros', (req, res) => { //Funciona bien
     res.json (libros);
 
 //-------------------------------------------------------------------
@@ -73,11 +101,19 @@ if (genero) {
 })
 //-------------------------------------------------------------------
 
-//3.1.2 Obtener registros concretos de formas distintas vistas en clase (Route param)
 
-app.get('/api/libros/:id', (req, res) => {
-    const id = parseInt(req.params.id);
-    const libro = libros.find(l = l.id === id);
+//3.1.2 Obtener registros concretos de formas distintas vistas en clase (Query param)
+/*Ahora funciona correctamente, sucedía que por alguna razón deben ir primero las
+rutas específicas en vez de las rutas con parametros como es el 'api/libros/:id'
+*/
+app.get('/api/libros/busqueda', (req,res) => {
+    const {identificador} = req.query;
+
+    if (!identificador){
+        return res.status(400).json({ error: "Se requiere el parámetro 'identificador'" });
+    }
+
+    const libro = libros.find(l => l.identificador === identificador);
 
     if (libro){
         res.json(libro);
@@ -86,15 +122,10 @@ app.get('/api/libros/:id', (req, res) => {
     }
 })
 
-//3.1.2 Obtener registros concretos de formas distintas vistas en clase (Query param)
+//3.1.2 Obtener registros concretos de formas distintas vistas en clase (Route param) //Se que funciona bien, y como funciona
 
-app.get('/api/libros/busqueda', (req,res) => {
-    const {identificador} = req.query;
-
-    if (!identificador){
-        return res.status(400).json({ error: "Se requiere el parámetro 'identificador'" });
-    }
-
+app.get('/api/libros/:id', (req, res) => {  //:id será sustituido por el número del libro que queremos mostrar
+    const id = parseInt(req.params.id);
     const libro = libros.find(l => l.id === id);
 
     if (libro){
@@ -106,9 +137,8 @@ app.get('/api/libros/busqueda', (req,res) => {
 
 //3.1.2 Crear un nuevo registro con validación de campos obligatorios
 
-app.post('/api/libros', (req,res) => {
+app.post('/api/libros/creacion', (req,res) => {
 const {nombre, identificador, autor, editorial, año_publicacion, genero, num_paginas } = req.body;
-
 
 if (!nombre || !identificador || !autor || !editorial || !año_publicacion || !genero || !num_paginas){
         return res.status(400).json({ 
@@ -118,7 +148,8 @@ if (!nombre || !identificador || !autor || !editorial || !año_publicacion || !g
 }
 
 if (libros.find(l => l.identificador === identificador)){
-    return res.status(400).json({ error: "El identificador ya existe" });}
+    return res.status(400).json({ error: "El identificador ya existe" });
+}
 
 const nuevoLibro = {
     id: libros.length+1,
@@ -133,8 +164,12 @@ const nuevoLibro = {
 };
 
 libros.push(nuevoLibro);
+res.status(201).json(nuevoLibro);
 })
-//3.1.3 Modificar un registro (completo)
+
+//3.1.3 Modificar un registro (completo) 
+/*Entiendo como funciona el código
+Y los cambios que tengo que realizar dentro de Bruno */
 
 app.put('/api/libros/:id', (req, res) => {
     const id = parseInt(req.params.id);
@@ -143,8 +178,11 @@ app.put('/api/libros/:id', (req, res) => {
     if (index === -1) {
         return res.status(404).json({ error: "Libro no encontrado" });
     }
-    
+
     const { nombre, identificador, autor, editorial, año_publicacion, genero, num_paginas, disponible } = req.body;
+
+    console.log("Body recibido:", req.body);
+    console.log("ID recibido:", req.params.id);
     
     if (!nombre || !identificador || !autor || !editorial || !año_publicacion || !genero || !num_paginas) {
         return res.status(400).json({ 
@@ -173,9 +211,9 @@ app.put('/api/libros/:id', (req, res) => {
     res.json(libros[index]);
 });
 
-// 3.1.4 Eliminar un registro
+// 3.1.4 Eliminar un registro   //Ya entiendo el código para eliminar registros
 
-app.delete('/api/libros/:id', (req,res) =>{
+app.delete('/api/libros/:id', (req,res) => {
     const id = parseInt(req.params.id);
     const indice = libros.findIndex(l => l.id === id);
 
@@ -186,8 +224,12 @@ app.delete('/api/libros/:id', (req,res) =>{
     const prestamoActivo = prestamos.some(p => p.libro_id === id && p.estado === 'activo');
 
     if (prestamoActivo){
-        return res.status(400).json({error: "No se pueden eliminar prstamos activos"});
+        return res.status(400).json({error: "No se pueden eliminar prestamos activos"});
     }
+
+    libros.splice(indice,1);
+
+    res.status(204).json("Registro eliminado correctamente");
 })
 
 // 3.2 ENDPOINTS RECURSO SECUNDARIO
@@ -232,7 +274,6 @@ if (año_max) {
     res.json(resultado);
 
 });
-
 //-------------------------------------------------------------------
 
 //3.2.2 Obtener todos los registros secundarios que pertenecen a un registro principal concreto
@@ -299,5 +340,4 @@ app.delete('/api/prestamos/:id', (req,res) =>{
     if (indice === -1){
         return res.status(400).json({error: "No se puede eliminar el prestamo activo, registrate"})
     }
-
 })
