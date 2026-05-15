@@ -55,8 +55,8 @@ const prestamos = [
     fecha_prestamo: "2026-10-15",
     fecha_devolucion_estimada: "2026-10-29",
     fecha_devolucion_real: null,
-    usuario: "Álvaro Lanceta",
-    email_usuario: "alanceta@gmail.com",
+    usuario: "Álvaro",
+    email_usuario: "alvaro@gmail.com",
     estado: "activo"
 },
 
@@ -68,6 +68,17 @@ const prestamos = [
     usuario: "Javi",
     email_usuario: "javi@gmail.com",
     estado: "inactivo"
+},
+
+{  id: 103,
+ libro_id: 3,
+ fecha_prestamo: "2026-12-15",
+ fecha_devolucion_estimada: "2027-01-30",
+ fecha_devolucion_real: null,
+ usuario: "Manuel",
+ email_usuario: "manu@gmail.com",
+ estado: "inactivo"
+
 }
 
 ];
@@ -82,7 +93,6 @@ Usar el archivo "Pruebas JS" del escritorio para las pruebas */
 // 3.1.1 Todos los registros
 
 app.get('/api/libros', (req, res) => { //Funciona bien
-
     res.json(libros);
 
 })
@@ -124,6 +134,87 @@ app.get('/api/libros/filtrado', (req, res) => { //Funciona bien
     res.json (resultado);
 })
 //-------------------------------------------------------------------
+
+//3.4 Endpoints Utilidades y Estadisticas
+
+//3.4.1 Valor de media, valor mínimo y máximo de un campo númerico
+
+app.get('/api/libros/estadisticas', (req, res) => {
+    const { campo } = req.query;
+
+    const camposNumericos = ['num_paginas', 'año_publicacion', 'id'];
+
+    if (!campo || !camposNumericos.includes(campo)) {
+        return res.status(400).json({
+            error: "Campo no válido",
+            campos_disponibles: camposNumericos
+        });
+    }
+
+    const valores = libros.map(libro => libro[campo]);
+
+    const media = valores.reduce((a, b) => a + b, 0) / valores.length;
+    const maximo = Math.max(...valores);
+    const minimo = Math.min(...valores);
+
+    res.json({
+        campo,
+        media: parseFloat(media.toFixed(2)),
+        maximo,
+        minimo
+    });
+});
+
+//3.4.2 Los "N" registros más altos o bajos
+
+app.get('/api/libros/ranking', (req, res) => {
+    const { campo, orden = 'desc', n = 3 } = req.query;
+
+    const camposNumericos = ['num_paginas', 'año_publicacion'];
+
+    if (!campo || !camposNumericos.includes(campo)) {
+        return res.status(400).json({
+            error: "Campo no válido",
+            campos_disponibles: camposNumericos
+        });
+    }
+
+    const limite = parseInt(n);
+
+    const resultado = [...libros]
+        .sort((a, b) => orden === 'asc' ? a[campo] - b[campo] : b[campo] - a[campo])
+        .slice(0, limite);
+
+    res.json({
+        campo,
+        orden,
+        top: limite,
+        resultado
+    });
+});
+
+//3.4.4 Agrupar y contar por campo categórico (RECURSO PRINCIPAL)
+
+app.get('/api/libros/agrupado', (req, res) => {
+    const { campo } = req.query;
+
+    const camposCategoricos = ['genero', 'autor', 'editorial'];
+
+    if (!campo || !camposCategoricos.includes(campo)) {
+        return res.status(400).json({
+            error: "Campo no válido",
+            campos_disponibles: camposCategoricos
+        });
+    }
+
+    const agrupado = libros.reduce((acc, libro) => {
+        const clave = libro[campo];
+        acc[clave] = (acc[clave] || 0) + 1;
+        return acc;
+    }, {});
+
+    res.json({ campo, agrupado });
+});
 
 
 //3.1.2 Obtener registros concretos de formas distintas vistas en clase (Query param)
@@ -169,10 +260,6 @@ if (!nombre || !identificador || !autor || !editorial || !año_publicacion || !g
             error: "Faltan campos obligatorios",
             campos_requeridos: ["nombre", "identificador", "autor", "editorial", "año_publicacion", "genero", "num_paginas"]
         });
-}
-
-if (libros.find(l => l.identificador === identificador)){
-    return res.status(400).json({ error: "El identificador ya existe" });
 }
 
 const nuevoLibro = {
@@ -253,7 +340,7 @@ app.delete('/api/libros/:id', (req,res) => {
 
     libros.splice(indice,1);
 
-    res.status(204).json("Registro eliminado correctamente");
+    res.status(200).json("Registro eliminado correctamente");
 })
 
 // 3.2 ENDPOINTS RECURSO SECUNDARIO
@@ -262,10 +349,14 @@ app.delete('/api/libros/:id', (req,res) => {
 
 app.get('/api/prestamos', (req, res) => {   //Funciona mostrando todos los libros que estan en prestamo
     res.json (prestamos)
+});
 
 //-------------------------------------------------------------------    
 //3.3 Filtros 
 // 3.3.3 Filtrar por multiples campos
+
+app.get('/api/prestamos/filtrado', (req, res) => {
+    res.json (prestamos)
 
 if (año_min) {
     resultado = resultado.filter(libro => libro.año_publicacion >= parseInt(año_min));
@@ -296,9 +387,33 @@ if (año_max) {
     }
 
     res.json(resultado);
-
 });
+
 //-------------------------------------------------------------------
+
+//3.4 Estadisticas y utilidades
+
+//3.4.4 Agrupar y contar por grupo categórico (RECURSO SECUNDARIO)
+app.get('/api/prestamos/agrupado', (req, res) => {
+    const { campo } = req.query;
+
+    const camposCategoricos = ['estado', 'usuario'];
+
+    if (!campo || !camposCategoricos.includes(campo)) {
+        return res.status(400).json({
+            error: "Campo no válido",
+            campos_disponibles: camposCategoricos
+        });
+    }
+
+    const agrupado = prestamos.reduce((acc, prestamo) => {
+        const clave = prestamo[campo];
+        acc[clave] = (acc[clave] || 0) + 1;
+        return acc;
+    }, {});
+
+    res.json({ campo, agrupado });
+});
 
 //3.2.2 Obtener todos los registros secundarios que pertenecen a un registro principal concreto
 
@@ -313,9 +428,9 @@ app.get('/api/prestamos/:id', (req,res) => {    //Funciona el get mostrando los 
     }
 });
 
-//3.2.3 Crear nuevo registro secundario     //Funciona la creación de otro registro secundario a partir de uno primario
+//3.2.3 Crear nuevo registro secundario     
 
-app.post('/api/prestamos/creacion', (req,res) => {
+app.post('/api/prestamos/creacion', (req,res) => {  //Funciona la creación de otro registro secundario a partir de uno primario
     const {libro_id, usuario, email_usuario, fecha_prestamo} = req.body;
 
     if (!libro_id ||!usuario ||!email_usuario){
@@ -365,3 +480,17 @@ app.delete('/api/prestamos/:id', (req,res) =>{
 
     res.status(204).json("Prestamo eliminado satisfactoriamente")
 })
+
+//3.4 Endpoint Utilidades y Estadisticas
+
+// 3.4.3 Total de registros de cada recurso
+app.get('/api/totales', (req, res) => {
+    res.json({
+        total_libros: libros.length,
+        total_prestamos: prestamos.length,
+        libros_disponibles: libros.filter(l => l.disponible).length,
+        libros_no_disponibles: libros.filter(l => !l.disponible).length,
+        prestamos_activos: prestamos.filter(p => p.estado === 'activo').length,
+        prestamos_inactivos: prestamos.filter(p => p.estado === 'inactivo').length
+    });
+});

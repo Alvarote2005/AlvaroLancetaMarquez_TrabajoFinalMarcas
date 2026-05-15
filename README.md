@@ -16,20 +16,21 @@ control de errores acerca de estos mismos endpoints
 
 ~~5º Realización de los endpoints acerca de los recursos secundarios (prestamos)~~
 
-6º Realización de los filtros en vista de los dos recursos previamente mencionados
+~~6º Realización de los filtros en vista de los dos recursos previamente mencionados~~
 
-7º Realización de los endpoints de utilidades que engloban a los dos recursos mencionados
+~~7º Realización de los endpoints de utilidades que engloban a los dos recursos mencionados~~
 
 8º Control de errores aplicado correctamente en cada endpoint
 
 ## Pre-requisitos
-Software necesario para poder poner a prueba esta API de prueba
+Software necesario para poder poner a prueba esta API 
+
+IDE: Visual Studio Code
 
 ```
 Nodemon
-```
 Express
-
+```
 
 ## Endpoints Registros Primarios a usar con sus URL y metodos correspondientes
 
@@ -50,4 +51,3 @@ GET http://localhost:2407/api/prestamos/id: (MUESTRA EL REGISTRO POR SU ID)
 POST http://localhost:2407/api/prestamos/creacion (CREA UN REGISTRO SECUNDARIO NUEVO)
 DELETE  http://localhost:2407/api/prestamos/creacion (ELIMINA UN REGISTRO SECUNDARIO A ELEGIR POR ID)
 ```
-
