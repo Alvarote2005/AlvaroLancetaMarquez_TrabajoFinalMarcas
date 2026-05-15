@@ -33,11 +33,24 @@ const libros = [
     disponible: true
     },
 
+    {
+    id: 3,
+    nombre: "Luna de pluton",
+    identificador: "123-45-679-8003-5",
+    autor: "Dross",
+    editorial: "Ni idea",
+    año_publicacion: 2017,
+    genero: "Realismo",
+    num_paginas: 800,
+    disponible: true
+    }
+
   ];
+  
 //RECURSO SECUNDARIO
 
-const prestamos = 
-[{id: 101,
+const prestamos = [
+{id: 101,
     libro_id: 1,
     fecha_prestamo: "2026-10-15",
     fecha_devolucion_estimada: "2026-10-29",
@@ -49,8 +62,8 @@ const prestamos =
 
 { id: 102,
     libro_id: 2,
-    fecha_prestamo: 2026-12-6,
-    fecha_devolucion_estimada: 2027-2-12,
+    fecha_prestamo: "2026-12-6",
+    fecha_devolucion_estimada: "2027-2-12",
     fecha_devolucion_real: null,
     usuario: "Javi",
     email_usuario: "javi@gmail.com",
@@ -58,15 +71,6 @@ const prestamos =
 }
 
 ];
-
-function obtenerDatosPrestamo(libro_id){
-    return prestamos.filter(prestamos => prestamos.libro_id === libro_id);
-}
-
-if (typeof module !== 'undefined' && module.exports){
-    module.exports = {libros, prestamos, obtenerDatosPrestamo}
-}
-
 
 //3er APARTADO (ENDPOINTS)
 
@@ -211,7 +215,7 @@ app.put('/api/libros/:id', (req, res) => {
     res.json(libros[index]);
 });
 
-// 3.1.4 Eliminar un registro   //Ya entiendo el código para eliminar registros
+// 3.1.4 Eliminar un registro //Ya entiendo el código para eliminar registros
 
 app.delete('/api/libros/:id', (req,res) => {
     const id = parseInt(req.params.id);
@@ -236,7 +240,7 @@ app.delete('/api/libros/:id', (req,res) => {
 
 // 3.2.1 Obtener todos los registros seundarios
 
-app.get('/api/prestamos', (req, res) => {
+app.get('/api/prestamos', (req, res) => {   //Funciona mostrando todos los libros que estan en prestamo
     res.json (prestamos)
 
 //-------------------------------------------------------------------    
@@ -278,24 +282,20 @@ if (año_max) {
 
 //3.2.2 Obtener todos los registros secundarios que pertenecen a un registro principal concreto
 
-app.get('/api/libros/:id/prestamos', (req,res) => {
+app.get('/api/prestamos/:id', (req,res) => {    //Funciona el get mostrando los prestamos por el id de los prestamos
     const id = parseInt(req.params.id);
-    const libro = libros.find(l => l.id === id);
+    const prestamo = prestamos.find(p => p.id === id);
 
-    if (!libro) {
+    if (prestamo) {
+        res.json(prestamo)
+    } else{
         return res.status(404).json({error: "No se encontro el libro"});
     }
-
-    const prestamosLibros = obtenerPrestamosLibro(id);
-    res.json({libro: libro.nombre,
-        total_prestamos: prestamosLibros.length,
-        prestamos: prestamosLibro
-    });
 });
 
-//3.2.3 Crear nuevo registro secundario
+//3.2.3 Crear nuevo registro secundario     //Funciona la creación de otro registro secundario a partir de uno primario
 
-app.post('/api/prestamos', (req,res) => {
+app.post('/api/prestamos/creacion', (req,res) => {
     const {libro_id, usuario, email_usuario, fecha_prestamo} = req.body;
 
     if (!libro_id ||!usuario ||!email_usuario){
@@ -315,7 +315,7 @@ if(!libro.disponible){
 }
 
 const nuevoPrestamo = {
-        id: nextPrestamoId++,
+        id: prestamos.length+1,
         libro_id: parseInt(libro_id),
         fecha_prestamo: fecha_prestamo || new Date().toISOString().split('T')[0],
         fecha_devolucion_estimada: new Date(Date.now() + 14*24*60*60*1000).toISOString().split('T')[0],
@@ -331,13 +331,17 @@ const nuevoPrestamo = {
     res.status(201).json(nuevoPrestamo);
 });
 
-//3.2.4 Eliminar registro secundario
+//3.2.4 Eliminar registro secundario //Funciona correctamente 
 
 app.delete('/api/prestamos/:id', (req,res) =>{
     const id = parseInt(req.params.id);
     const indice = prestamos.findIndex(p => p.id === id);
 
     if (indice === -1){
-        return res.status(400).json({error: "No se puede eliminar el prestamo activo, registrate"})
+        return res.status(400).json({error: "No se puede eliminar un prestamo activo"})
     }
+
+    prestamos.splice(indice,1);
+
+    res.status(204).json("Prestamo eliminado satisfactoriamente")
 })
