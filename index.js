@@ -74,7 +74,7 @@ const prestamos = [
 
 //3er APARTADO (ENDPOINTS)
 
-/* Funciona correctamente las operaciones básicas de los registros primarios
+/* Funciona correctamente las operaciones básicas de los registros primarios y secundarios.
 Usar el archivo "Pruebas JS" del escritorio para las pruebas */
 
 
@@ -82,26 +82,46 @@ Usar el archivo "Pruebas JS" del escritorio para las pruebas */
 // 3.1.1 Todos los registros
 
 app.get('/api/libros', (req, res) => { //Funciona bien
-    res.json (libros);
+
+    res.json(libros);
+
+})
+
+app.get('/api/libros/filtrado', (req, res) => { //Funciona bien
 
 //-------------------------------------------------------------------
 // 3.3 FILTROS 
-    const { nombre, genero, disponible, año_min, año_max, orden, limite } = req.query;
-// 3.3.1 Filtrar por campo de texto
+   let resultado = libros;
 
-if (nombre) {
-    resultado = resultado.filter(libro =>
-        libro.nombre.toLowerCase().includes(nombre.toLowerCase())
-    );
-}
+    const { nombre, genero, año_min, año_max } = req.query;
 
-// 3.3.2 Filtrar por categoría de campo
+    // 3.3.1 Filtrar por nombre (texto parcial) //Funcional
+    if (nombre) {
+        resultado = resultado.filter(libro =>
+            libro.nombre.toLowerCase().includes(nombre.toLowerCase())
+        );
+    }
 
-if (genero) {
-    resultado = resultado.filter(libro =>
-        libro.genero.toLowerCase() === genero.toLowerCase()
-    );
-}
+    // 3.3.2 Filtrar por género
+    if (genero) {
+        resultado = resultado.filter(libro =>
+            libro.genero.toLowerCase() === genero.toLowerCase()
+        );
+    }
+
+    // 3.3.3 Filtrar por rango de años
+    if (año_min) {
+        resultado = resultado.filter(libro =>
+            libro.año_publicacion >= parseInt(año_min)
+        );
+    }
+    if (año_max) {
+        resultado = resultado.filter(libro =>
+            libro.año_publicacion <= parseInt(año_max)
+        );
+    }
+
+    res.json (resultado);
 })
 //-------------------------------------------------------------------
 
